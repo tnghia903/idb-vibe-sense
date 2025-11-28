@@ -1,0 +1,43 @@
+:root {
+  /* Dark Romantic Palette (Reference Image) */
+  --color-primary: #FF4B2B; /* Vibrant Red/Orange */
+  --color-primary-dark: #E43D1F;
+  --color-secondary: #FF416C; /* Pinkish Red */
+  --color-background: #0F0F0F; /* Deep Black */
+  --color-surface: #1E1E1E; /* Dark Gray Card */
+  --color-text-main: #FFFFFF; /* White */
+  --color-text-secondary: #A0A0A0; /* Light Gray */
+  --color-accent: #FFD93D; /* Gold/Yellow */
+  --color-error: #FF4B4B;
+
+  /* Gradients */
+  --gradient-bg: linear-gradient(180deg, #1A1A1A 0%, #000000 100%);
+  --gradient-primary: linear-gradient(to right, #FF4B2B, #FF416C);
+  --gradient-card: linear-gradient(145deg, #2A2A2A, #1F1F1F);
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+
+  /* Border Radius */
+  --radius-sm: 12px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 4px 10px rgba(0,0,0,0.3);
+  --shadow-md: 0 10px 30px rgba(0,0,0,0.5);
+  --shadow-lg: 0 20px 50px rgba(255, 75, 43, 0.15); /* Red glow */
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
