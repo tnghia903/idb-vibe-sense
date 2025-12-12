@@ -1,14 +1,544 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/idb-vibe-sense/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>idb-webapp</title>
-    <script type="module" crossorigin src="/idb-vibe-sense/assets/index-bqz1MNDs.js"></script>
-    <link rel="stylesheet" crossorigin href="/idb-vibe-sense/assets/index-C_1iZkmA.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlowMate Hybrid Finder</title>
+    <style>
+        /* --- 1. CSS Styles --- */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            --card-bg: rgba(255, 255, 255, 0.92);
+            --primary: #667eea;
+            --accent: #ff9a9e;
+            --text-main: #2d3748;
+            --text-sub: #718096;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* --- Navigation --- */
+        nav {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-sizing: border-box;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .logo {
+            color: white;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .burger {
+            display: none;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .burger div { width: 25px; height: 3px; background: white; border-radius: 5px; }
+
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 500; cursor: pointer; opacity: 0.9; }
+
+        /* --- Container --- */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 100px 20px 40px 20px;
+        }
+
+        /* --- Hero Section --- */
+        .hero-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-start-journey {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 60px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .btn-start-journey:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 15px 35px rgba(255, 154, 158, 0.6);
+        }
+
+        .toggle-settings-btn {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .toggle-settings-btn:hover { background: rgba(255,255,255,0.4); }
+
+        /* --- Settings Panel --- */
+        #settingsPanel {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); scale: 0.98; } to { opacity: 1; transform: translateY(0); scale: 1; } }
+
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .setting-label { font-weight: 700; color: var(--text-main); min-width: 130px; }
+        .setting-val { color: var(--primary); font-weight: 800; margin-left: 15px; }
+        input[type=range] { flex: 1; accent-color: var(--accent); height: 6px; border-radius: 5px; cursor: pointer; }
+
+        /* --- SEARCH BAR --- */
+        .results-header { margin-bottom: 15px; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        .search-container {
+            display: flex;
+            background: white;
+            border-radius: 50px;
+            padding: 5px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            transition: transform 0.3s;
+        }
+        .search-container:focus-within { transform: scale(1.02); }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+            border-radius: 50px 0 0 50px;
+            color: var(--text-main);
+        }
+
+        .btn-group { display: flex; gap: 5px; padding-right: 5px; align-items: center; }
+
+        .btn-gps {
+            background: #f0f4f8;
+            color: var(--primary);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-gps:hover { background: #e2e8f0; color: var(--accent); }
+
+        .btn-search {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 0 30px;
+            height: 45px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-search:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* --- Grid & Cards --- */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { 
+            background: var(--card-bg); border-radius: 20px; overflow: hidden; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05); transition: all 0.3s; cursor: pointer; position: relative;
+        }
+        .card:hover { transform: translateY(-8px) scale(1.02); }
+        .card img { width: 100%; height: 180px; object-fit: cover; }
+        
+        .card-body { padding: 18px; }
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        .badge-type { font-size: 0.8rem; background: #edf2f7; padding: 4px 12px; border-radius: 12px; color: #4a5568; font-weight: 600; text-transform: capitalize; }
+        .badge-rating { font-size: 1rem; color: #d69e2e; font-weight: 800; }
+        .card-title { font-size: 1.2rem; font-weight: 800; margin: 0 0 8px 0; }
+        .card-dist { font-size: 0.9rem; color: var(--text-sub); }
+        
+        .btn-go {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            background: #e2e8f0;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .card:hover .btn-go { background: var(--primary); color: white; }
+
+        /* --- Timer Overlay --- */
+        #timerOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            z-index: 2000; flex-direction: column; justify-content: center; align-items: center;
+            color: white; text-align: center;
+        }
+        .timer-time { font-size: 6rem; font-weight: 900; margin: 30px 0; font-variant-numeric: tabular-nums; }
+        .btn-stop { background: rgba(255,255,255,0.2); border: 3px solid white; color: white; padding: 15px 40px; border-radius: 50px; font-weight: 800; cursor: pointer; transition: 0.3s; font-size: 1.1rem; backdrop-filter: blur(5px); }
+        .btn-stop:hover { background: white; color: var(--accent); }
+
+        @media (max-width: 768px) {
+            .burger { display: flex; }
+            .nav-links { display: none; position: absolute; top: 70px; right: 20px; background: rgba(255,255,255,0.98); flex-direction: column; padding: 25px; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); min-width: 180px; }
+            .nav-links.active { display: flex; }
+            .search-container { flex-direction: column; border-radius: 20px; padding: 10px; gap: 10px; }
+            .search-input { width: 100%; padding: 10px; text-align: center; border-radius: 10px; box-sizing: border-box;}
+            .btn-group { width: 100%; justify-content: center; gap: 10px; padding: 0; }
+            .btn-search { width: 100%; }
+        }
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid white; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#paint0_linear)" />
+                <defs><linearGradient id="paint0_linear" x1="2" y1="3" x2="22" y2="21.35" gradientUnits="userSpaceOnUse"><stop stop-color="#667eea"/><stop offset="1" stop-color="#ff9a9e"/></linearGradient></defs>
+            </svg>
+            GlowMate
+        </div>
+        <div class="burger" onclick="toggleMenu()"><div></div><div></div><div></div></div>
+        <div class="nav-links" id="navLinks">
+            <a onclick="toggleSettings(); toggleMenu()">Preferences</a>
+            <a href="#">My Journeys</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <div class="hero-section">
+            <button class="btn-start-journey" onclick="startTimerJourney()">
+                <svg width="36" height="32" viewBox="0 0 36 32" fill="none" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+                    <path d="M16 2.5C13 0.5 9 0.5 6 2.5C3 4.5 1 8.5 3 13C3 18 8 23 16 29C24 23 29 18 29 13C29 8.5 27 4.5 24 2.5C21 0.5 17 0.5 14 2.5" fill="#667eea" transform="translate(-3, 2) scale(0.9)" opacity="0.9"/>
+                    <path d="M16 2.5C13 0.5 9 0.5 6 2.5C3 4.5 1 8.5 3 13C3 18 8 23 16 29C24 23 29 18 29 13C29 8.5 27 4.5 24 2.5C21 0.5 17 0.5 14 2.5" fill="#ff9a9e" transform="translate(3, 0)"/>
+                </svg>
+                <span>Start Journey</span>
+            </button>
+            <br>
+            <button class="toggle-settings-btn" onclick="toggleSettings()">
+                <span>⚙️</span> Configure Timer & Search
+            </button>
+        </div>
+
+        <div id="settingsPanel">
+            <div class="setting-row">
+                <label class="setting-label">🕐 Duration</label>
+                <input type="range" id="timerRange" min="5" max="90" step="5" value="30" oninput="updateVal('timerLabel', this.value + ' mins')">
+                <span id="timerLabel" class="setting-val">30 mins</span>
+            </div>
+            <div class="setting-row">
+                <label class="setting-label">📏 Radius</label>
+                <input type="range" id="radiusRange" min="0.5" max="3" step="0.5" value="1.5" oninput="updateVal('radiusLabel', this.value + ' km')">
+                <span id="radiusLabel" class="setting-val">1.5 km</span>
+            </div>
+            <div style="text-align: right; margin-top: 15px;">
+                <button onclick="applySettings()" style="background:var(--primary); color:white; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;">Apply Filters</button>
+            </div>
+        </div>
+
+        <div class="results-header">
+            <h2 style="margin:0;">📍 Cozy Spots Finder</h2>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="Enter postal (e.g. 428888) or 'City Name'">
+            <div class="btn-group">
+                <button class="btn-gps" onclick="useGPS()" title="Use Current GPS Location">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>
+                </button>
+                <button class="btn-search" onclick="performSearch()">Search</button>
+            </div>
+        </div>
+
+        <div id="grid" class="grid"></div>
+
+    </div>
+
+    <div id="timerOverlay">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 5px 15px rgba(255,255,255,0.4)); margin-bottom: 20px;">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="white"/>
+        </svg>
+        <h2 style="margin:0; font-size: 2rem;">GlowMate Active</h2>
+        <div class="timer-time" id="countdown">30:00</div>
+        <button class="btn-stop" onclick="stopTimerJourney()">🎉 Arrived!</button>
+    </div>
+
+    <script>
+        // --- 1. CONFIGURATION ---
+        let userRadius = 1.5; // km
+        let currentLat = null;
+        let currentLng = null;
+        let timerInterval;
+
+        const cozyImages = [
+            "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=500&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1514362545857-3bc16549766b?w=500&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=500&auto=format&fit=crop"
+        ];
+
+        window.onload = function() {
+            document.getElementById('searchInput').addEventListener("keypress", function(event) {
+                if (event.key === "Enter") performSearch();
+            });
+        };
+
+        // --- UI FUNCTIONS ---
+        function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+        }
+        function updateVal(id, val) { document.getElementById(id).innerText = val; }
+        
+        function applySettings() {
+            userRadius = parseFloat(document.getElementById('radiusRange').value);
+            performSearch(); 
+            toggleSettings();
+        }
+
+        // --- CORE SEARCH LOGIC ---
+
+        function useGPS() {
+            const grid = document.getElementById('grid');
+            document.getElementById('searchInput').value = "";
+            grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1; padding: 40px; font-size:1.1rem;"><div class="loader"></div> Acquiring GPS Signal...</div>`;
+
+            if (!navigator.geolocation) {
+                grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1;">Geolocation is not supported.</div>`;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    currentLat = position.coords.latitude;
+                    currentLng = position.coords.longitude;
+                    fetchOverpassData(currentLat, currentLng);
+                },
+                (error) => {
+                    grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1;">GPS Error. Try typing a location.</div>`;
+                }
+            );
+        }
+
+        function performSearch() {
+            const inputVal = document.getElementById('searchInput').value.trim();
+            const grid = document.getElementById('grid');
+
+            if (inputVal === "") {
+                if (currentLat && currentLng) fetchOverpassData(currentLat, currentLng);
+                else useGPS();
+                return;
+            }
+
+            grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1; padding: 40px; font-size:1.1rem;"><div class="loader"></div> Finding "${inputVal}" via OpenStreetMap...</div>`;
+
+            // Step 1: Geocoding (Free)
+            const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(inputVal)}&limit=1`;
+
+            fetch(nominatimUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        currentLat = parseFloat(data[0].lat);
+                        currentLng = parseFloat(data[0].lon);
+                        fetchOverpassData(currentLat, currentLng);
+                    } else {
+                        grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1;">Location not found. Try postal code.</div>`;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1;">Network Error.</div>`;
+                });
+        }
+
+        function fetchOverpassData(lat, lon) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1; padding: 40px; font-size:1.1rem;"><div class="loader"></div> Scanning for cafes...</div>`;
+
+            // Step 2: Overpass API (Free)
+            const radiusMeters = userRadius * 1000;
+            const query = `
+                [out:json];
+                (
+                  node["amenity"~"cafe|restaurant|bar"](around:${radiusMeters},${lat},${lon});
+                );
+                out body 20;
+            `;
+
+            const overpassUrl = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+            fetch(overpassUrl)
+                .then(response => response.json())
+                .then(data => {
+                    renderCards(data.elements, lat, lon);
+                })
+                .catch(err => {
+                    grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1;">API Busy. Please try again in 10s.</div>`;
+                });
+        }
+
+        // --- NEW: WIKIMEDIA IMAGE FETCH ---
+        async function fetchWikiImage(lat, lon) {
+            // Search for images within 50m of the spot
+            const url = `https://en.wikipedia.org/w/api.php?origin=*&action=query&list=geosearch&gsradius=50&gscoord=${lat}|${lon}&gsprop=type&gsnamespace=6&format=json`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const pages = data.query.geosearch;
+
+                if (pages && pages.length > 0) {
+                    // If found, get the actual image URL for the first result
+                    const pageId = pages[0].pageid;
+                    const imgUrlReq = `https://en.wikipedia.org/w/api.php?origin=*&action=query&prop=imageinfo&iiprop=url&pageids=${pageId}&format=json`;
+                    const imgResp = await fetch(imgUrlReq);
+                    const imgData = await imgResp.json();
+                    return imgData.query.pages[pageId].imageinfo[0].url;
+                }
+            } catch (e) {
+                return null; // Fail silently
+            }
+            return null;
+        }
+
+        async function renderCards(elements, originLat, originLon) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            if (!elements || elements.length === 0) {
+                grid.innerHTML = `<div style="color:white; text-align:center; grid-column: 1/-1; background: rgba(255,255,255,0.2); padding: 30px; border-radius: 20px;">No spots found nearby.</div>`;
+                return;
+            }
+
+            // Iterate asynchronously to allow image fetching
+            for (const [index, item] of elements.entries()) {
+                const name = item.tags.name || "Cozy Spot";
+                const type = item.tags.amenity || "Cafe";
+                const rating = ((item.id % 10) + 40) / 10; // Simulated Rating
+                const distVal = getDistanceFromLatLonInKm(originLat, originLon, item.lat, item.lon).toFixed(1);
+
+                // --- 1. Try to get a REAL image from Wikimedia ---
+                let imgUrl = await fetchWikiImage(item.lat, item.lon);
+
+                // --- 2. Fallback to Cozy Stock Image ---
+                if (!imgUrl) {
+                    imgUrl = cozyImages[index % cozyImages.length];
+                }
+
+                // --- 3. Google Maps Direction Link ---
+                // We use the exact latitude and longitude from OpenStreetMap to open Google Maps
+                const dirLink = `https://www.google.com/maps/dir/?api=1&destination=${item.lat},${item.lon}`;
+
+                grid.innerHTML += `
+                    <div class="card" onclick="window.open('${dirLink}', '_blank')">
+                        <img src="${imgUrl}" alt="${name}" onerror="this.src='${cozyImages[0]}'">
+                        <div class="card-body">
+                            <div class="card-top">
+                                <span class="badge-type">${type}</span>
+                                <span class="badge-rating">★ ${rating.toFixed(1)}</span>
+                            </div>
+                            <h3 class="card-title">${name}</h3>
+                            <div class="card-dist">📍 ${distVal} km away</div>
+                            <button class="btn-go">
+                                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z" transform="rotate(180 8 8)"/></svg>
+                                Get Directions
+                            </button>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // --- UTILS ---
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
+            return R * c; 
+        }
+        function deg2rad(deg) { return deg * (Math.PI / 180); }
+
+        // --- TIMER LOGIC (Unchanged) ---
+        function startTimerJourney() {
+            const durationMins = parseInt(document.getElementById('timerRange').value);
+            let seconds = durationMins * 60;
+            document.getElementById('timerOverlay').style.display = 'flex';
+            const display = document.getElementById('countdown');
+            if (timerInterval) clearInterval(timerInterval);
+            updateTimerDisplay(seconds, display);
+            timerInterval = setInterval(() => {
+                seconds--;
+                updateTimerDisplay(seconds, display);
+                if (seconds <= 0) stopTimerJourney();
+            }, 1000);
+        }
+
+        function updateTimerDisplay(totalSeconds, displayEl) {
+            const m = Math.floor(totalSeconds / 60);
+            const s = totalSeconds % 60;
+            displayEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function stopTimerJourney() {
+            clearInterval(timerInterval);
+            document.getElementById('timerOverlay').style.display = 'none';
+        }
+    </script>
+</body>
 </html>
